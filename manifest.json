@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Phishing & Malicious URL Detector",
+  "version": "1.0",
+  "description": "Real-time AI-powered Phishing and Malicious URL Detection",
+  "permissions": [
+    "webNavigation",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://work-mvnz.onrender.com/*",
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Phishing Detector Active"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["warning.html", "warning.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

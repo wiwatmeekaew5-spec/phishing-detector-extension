@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚠️ เตือนความเสี่ยงเว็บไซต์!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --canvas-deep:#060a13;
+            --canvas-mid:#150a0d;
+            --panel:#12101a;
+            --panel-alt:#1a1620;
+            --ink-000:#f5f6f8;
+            --ink-400:#9aa3b5;
+            --border:#2a2438;
+            --red:#ef4444;
+            --red-dim:#b91c1c;
+            --amber:#f5a623;
+            --teal:#2dd4bf;
+            --mono:'JetBrains Mono', monospace;
+            --sans:'Sarabun', sans-serif;
+        }
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{
+            font-family:var(--sans);
+            background:
+                radial-gradient(ellipse 900px 500px at 50% -10%, rgba(239,68,68,0.16), transparent 60%),
+                radial-gradient(ellipse 700px 400px at 10% 100%, rgba(245,166,35,0.07), transparent 60%),
+                linear-gradient(180deg,var(--canvas-deep) 0%,#0e0810 100%);
+            color:var(--ink-000);
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:28px 16px;
+            position:relative;
+            overflow-x:hidden;
+        }
+        /* faint hazard grid */
+        body::before{
+            content:"";
+            position:fixed; inset:0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size:42px 42px;
+            mask-image:radial-gradient(ellipse 65% 55% at 50% 25%, black, transparent 80%);
+            pointer-events:none;
+        }
+
+        .card{
+            background:var(--panel);
+            border-radius:18px;
+            max-width:520px;
+            width:100%;
+            border:1px solid var(--border);
+            box-shadow:0 30px 70px -20px rgba(239,68,68,.25), 0 0 0 1px rgba(255,255,255,.02);
+            position:relative;
+            overflow:hidden;
+            z-index:1;
+        }
+        /* hazard stripe top bar */
+        .hazard-bar{
+            height:6px;
+            width:100%;
+            background:repeating-linear-gradient(
+                -45deg,
+                var(--amber),
+                var(--amber) 12px,
+                #1a1420 12px,
+                #1a1420 24px
+            );
+        }
+
+        .card-body{ padding:38px 34px 32px; text-align:center; }
+
+        .eyebrow{
+            font-family:var(--mono);
+            font-size:11px;
+            letter-spacing:.2em;
+            color:var(--red);
+            text-transform:uppercase;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:9px;
+            margin-bottom:18px;
+        }
+        .eyebrow .dot{
+            width:6px;height:6px;border-radius:50%;
+            background:var(--red);
+            box-shadow:0 0 0 3px rgba(239,68,68,.25);
+            animation:pulse-dot 1.6s ease-in-out infinite;
+        }
+        @keyframes pulse-dot{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+        .alert-icon{
+            width:74px;height:74px;
+            margin:0 auto 18px;
+            border-radius:50%;
+            display:flex;align-items:center;justify-content:center;
+            background:radial-gradient(circle, rgba(239,68,68,.18), rgba(239,68,68,0) 70%);
+            position:relative;
+        }
+        .alert-icon::before{
+            content:"";
+            position:absolute; inset:0;
+            border-radius:50%;
+            border:1.5px solid rgba(239,68,68,.4);
+            animation:ring-pulse 2s ease-out infinite;
+        }
+        .alert-icon span{ font-size:34px; position:relative; z-index:1; }
+        @keyframes ring-pulse{
+            0%{ transform:scale(.85); opacity:.9; }
+            100%{ transform:scale(1.35); opacity:0; }
+        }
+        @media (prefers-reduced-motion: reduce){
+            .eyebrow .dot, .alert-icon::before{ animation:none; }
+        }
+
+        h2{
+            color:var(--red);
+            font-size:22px;
+            font-weight:700;
+            letter-spacing:-.01em;
+            margin-bottom:10px;
+        }
+        p.lede{
+            color:#cbd5e1;
+            font-size:14.5px;
+            line-height:1.6;
+            margin-bottom:20px;
+        }
+        p.lede b{ color:var(--red); font-weight:700; }
+
+        #targetUrl{
+            background:#0b0710;
+            border:1px solid var(--border);
+            border-radius:10px;
+            padding:12px 14px;
+            font-family:var(--mono);
+            font-size:12.5px;
+            color:var(--amber);
+            text-align:left;
+            word-break:break-all;
+            margin-bottom:14px;
+        }
+
+        #reasonText{
+            text-align:left;
+            font-size:13px;
+            color:#fca5a5;
+            line-height:1.6;
+            margin-bottom:22px;
+        }
+
+        h6.confirm-line{
+            font-size:14.5px;
+            font-weight:600;
+            color:var(--ink-000);
+            margin-bottom:20px;
+        }
+
+        .actions{
+            display:flex;
+            flex-direction:column;
+            gap:12px;
+        }
+        button{
+            font-family:var(--sans);
+            border-radius:11px;
+            border:none;
+            cursor:pointer;
+            transition:transform .15s ease, filter .15s ease, background .2s ease, box-shadow .15s ease;
+        }
+        #btnCancel{
+            background:linear-gradient(135deg,#0f766e,#0d9488 45%,#14b8a6);
+            color:#fff;
+            padding:15px;
+            font-size:15.5px;
+            font-weight:700;
+            box-shadow:0 12px 24px -8px rgba(13,148,136,.55);
+        }
+        #btnCancel:hover{
+            filter:brightness(1.06);
+            transform:translateY(-1px);
+            box-shadow:0 16px 30px -8px rgba(13,148,136,.65);
+        }
+        #btnCancel:active{ transform:translateY(0); }
+
+        #btnProceed{
+            background:transparent;
+            color:#f87171;
+            border:1.5px solid rgba(239,68,68,.4);
+            padding:12px;
+            font-size:13.5px;
+            font-weight:600;
+        }
+        #btnProceed:hover{
+            background:rgba(239,68,68,.08);
+            border-color:var(--red);
+        }
+
+        .foot-note{
+            margin-top:20px;
+            font-family:var(--mono);
+            font-size:10.5px;
+            letter-spacing:.08em;
+            color:rgba(255,255,255,.28);
+            text-transform:uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="hazard-bar"></div>
+        <div class="card-body">
+            <div class="eyebrow"><span class="dot"></span>Threat Detected</div>
+
+            <div class="alert-icon"><span>⚠️</span></div>
+
+            <h2>คำเตือนความเสี่ยง!</h2>
+            <p class="lede">เว็บไซต์ที่คุณกำลังจะเข้าถูกประเมินว่าอาจเป็น <b>Phishing</b></p>
+
+            <div id="targetUrl"></div>
+            <p id="reasonText"></p>
+
+            <h6 class="confirm-line">คุณยังคงต้องการที่จะเข้าเว็บไซต์นี้ต่อหรือไม่?</h6>
+
+            <div class="actions">
+                <button id="btnCancel">🛡️ กลับไปยังหน้าปลอดภัย (แนะนำ)</button>
+                <button id="btnProceed">⚠️ ยืนยันว่าเสี่ยงจริง และต้องการเข้าต่อ</button>
+            </div>
+
+            <div class="foot-note">Protected by AI Hybrid Detection Engine</div>
+        </div>
+    </div>
+
+    <script src="warning.js"></script>
+</body>
+</html>
