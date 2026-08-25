@@ -7,6 +7,7 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
     !details.url.includes("work-mvnz.onrender.com")
   ) {
     const urlToScan = details.url;
+    const tabId = details.tabId;
 
     // 🟢 เช็กว่า URL นี้ได้รับการยืนยัน "ยินยอมเข้าต่อ" หรือยัง
     chrome.storage.local.get("allowedUrl").then((data) => {
@@ -28,18 +29,28 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
         .then((result) => {
           if (!result) return;
 
-          // ถ้าเสี่ยงสูง ให้บันทึกข้อมูลแล้วเปิดหน้า warning.html ทันที
+          // ถ้าเสี่ยงสูง ให้บันทึกข้อมูลแล้วเปิดหน้า warning.html
           if (result.prediction === "PHISHING" || result.risk_score >= 50) {
-            chrome.storage.local
-              .set({
-                blockedUrl: urlToScan,
-                scanResult: result
-              })
-              .then(() => {
-                chrome.tabs.update(details.tabId, {
-                  url: chrome.runtime.getURL("warning.html")
+            // ตรวจสอบว่าแท็บยังเปิดอยู่จริงก่อนเปลี่ยนหน้า
+            chrome.tabs.get(tabId, (tab) => {
+              if (chrome.runtime.lastError || !tab) {
+                // หากแท็บถูกปิดไปแล้ว ให้หยุดทำงานทันที ไม่ฟ้อง Error
+                return;
+              }
+
+              chrome.storage.local
+                .set({
+                  blockedUrl: urlToScan,
+                  scanResult: result
+                })
+                .then(() => {
+                  chrome.tabs.update(tabId, {
+                    url: chrome.runtime.getURL("warning.html")
+                  }).catch((err) => {
+                    console.warn("Could not update tab (tab might be closed):", err);
+                  });
                 });
-              });
+            });
           }
         })
         .catch((error) => {
