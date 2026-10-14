@@ -1,4 +1,7 @@
-chrome.webNavigation.onBeforeNavigate.addListener((details) => {
+const API_BASE_URL = "https://work-mvnz.onrender.com";
+
+chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
+  // กรองเฉพาะการเปิดหน้าต่างหลัก และไม่ตรวจสอบเว็บระบบ/เซิร์ฟเวอร์ตัวเอง
   if (
     details.frameId === 0 &&
     details.url.startsWith("http") &&
@@ -9,53 +12,44 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
     const urlToScan = details.url;
     const tabId = details.tabId;
 
-    // 🟢 เช็กว่า URL นี้ได้รับการยืนยัน "ยินยอมเข้าต่อ" หรือยัง
-    chrome.storage.local.get("allowedUrl").then((data) => {
-      if (data && data.allowedUrl === urlToScan) {
-        chrome.storage.local.remove("allowedUrl");
+    try {
+      // 1. ตรวจสอบว่าผู้ใช้เคยกดยืนยัน Bypass เพื่อเข้าเว็บนี้ไว้แล้วหรือไม่
+      const storageData = await chrome.storage.local.get("allowedUrl");
+      if (storageData && storageData.allowedUrl === urlToScan) {
+        await chrome.storage.local.remove("allowedUrl");
         return;
       }
 
-      // ส่ง URL ไปตรวจกับ Backend บน Render
-      fetch("https://work-mvnz.onrender.com/predict", {
+      // 2. ส่ง URL ไปตรวจกับ Hybrid AI Engine
+      const response = await fetch(`${API_BASE_URL}/predict`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: urlToScan })
-      })
-        .then((response) => {
-          if (!response.ok) return null;
-          return response.json();
-        })
-        .then((result) => {
-          if (!result) return;
+      });
 
-          // ถ้าเสี่ยงสูง ให้บันทึกข้อมูลแล้วเปิดหน้า warning.html
-          if (result.prediction === "PHISHING" || result.risk_score >= 50) {
-            // ตรวจสอบว่าแท็บยังเปิดอยู่จริงก่อนเปลี่ยนหน้า
-            chrome.tabs.get(tabId, (tab) => {
-              if (chrome.runtime.lastError || !tab) {
-                // หากแท็บถูกปิดไปแล้ว ให้หยุดทำงานทันที ไม่ฟ้อง Error
-                return;
-              }
+      if (!response.ok) return;
+      const result = await response.json();
 
-              chrome.storage.local
-                .set({
-                  blockedUrl: urlToScan,
-                  scanResult: result
-                })
-                .then(() => {
-                  chrome.tabs.update(tabId, {
-                    url: chrome.runtime.getURL("warning.html")
-                  }).catch((err) => {
-                    console.warn("Could not update tab (tab might be closed):", err);
-                  });
-                });
+      // 3. เงื่อนไขการสกัดกั้น (Hard Block): ตัดสินเมื่อเป็น PHISHING หรือคะแนนความเสี่ยง >= 60
+      if (result.prediction === "PHISHING" || Number(result.risk_score) >= 60) {
+        chrome.tabs.get(tabId, (tab) => {
+          if (chrome.runtime.lastError || !tab) return;
+
+          // บันทึกข้อมูลและเปลี่ยนเส้นทางไปยังหน้าเตือน warning.html
+          chrome.storage.local.set({
+            blockedUrl: urlToScan,
+            scanResult: result
+          }).then(() => {
+            chrome.tabs.update(tabId, {
+              url: chrome.runtime.getURL("warning.html")
+            }).catch((err) => {
+              console.warn("Could not redirect tab:", err);
             });
-          }
-        })
-        .catch((error) => {
-          console.error("Error checking URL:", error);
+          });
         });
-    });
+      }
+    } catch (error) {
+      console.error("URL Security Check Error:", error);
+    }
   }
 });
