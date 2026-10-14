@@ -9,11 +9,14 @@
     <style>
         :root{
             --canvas-deep:#060a13;
+            --canvas-mid:#150a0d;
             --panel:#12101a;
+            --panel-alt:#1a1620;
             --ink-000:#f5f6f8;
             --ink-400:#9aa3b5;
             --border:#2a2438;
             --red:#ef4444;
+            --red-dim:#b91c1c;
             --amber:#f5a623;
             --teal:#2dd4bf;
             --mono:'JetBrains Mono', monospace;
@@ -35,6 +38,7 @@
             position:relative;
             overflow-x:hidden;
         }
+        /* faint hazard grid */
         body::before{
             content:"";
             position:fixed; inset:0;
@@ -45,10 +49,11 @@
             mask-image:radial-gradient(ellipse 65% 55% at 50% 25%, black, transparent 80%);
             pointer-events:none;
         }
+
         .card{
             background:var(--panel);
             border-radius:18px;
-            max-width:540px;
+            max-width:520px;
             width:100%;
             border:1px solid var(--border);
             box-shadow:0 30px 70px -20px rgba(239,68,68,.25), 0 0 0 1px rgba(255,255,255,.02);
@@ -56,6 +61,7 @@
             overflow:hidden;
             z-index:1;
         }
+        /* hazard stripe top bar */
         .hazard-bar{
             height:6px;
             width:100%;
@@ -67,7 +73,9 @@
                 #1a1420 24px
             );
         }
-        .card-body{ padding:36px 32px 30px; text-align:center; }
+
+        .card-body{ padding:38px 34px 32px; text-align:center; }
+
         .eyebrow{
             font-family:var(--mono);
             font-size:11px;
@@ -78,7 +86,7 @@
             align-items:center;
             justify-content:center;
             gap:9px;
-            margin-bottom:16px;
+            margin-bottom:18px;
         }
         .eyebrow .dot{
             width:6px;height:6px;border-radius:50%;
@@ -87,9 +95,10 @@
             animation:pulse-dot 1.6s ease-in-out infinite;
         }
         @keyframes pulse-dot{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
         .alert-icon{
-            width:70px;height:70px;
-            margin:0 auto 16px;
+            width:74px;height:74px;
+            margin:0 auto 18px;
             border-radius:50%;
             display:flex;align-items:center;justify-content:center;
             background:radial-gradient(circle, rgba(239,68,68,.18), rgba(239,68,68,0) 70%);
@@ -102,118 +111,104 @@
             border:1.5px solid rgba(239,68,68,.4);
             animation:ring-pulse 2s ease-out infinite;
         }
-        .alert-icon span{ font-size:32px; position:relative; z-index:1; }
+        .alert-icon span{ font-size:34px; position:relative; z-index:1; }
         @keyframes ring-pulse{
             0%{ transform:scale(.85); opacity:.9; }
             100%{ transform:scale(1.35); opacity:0; }
         }
+        @media (prefers-reduced-motion: reduce){
+            .eyebrow .dot, .alert-icon::before{ animation:none; }
+        }
+
         h2{
             color:var(--red);
             font-size:22px;
             font-weight:700;
-            margin-bottom:8px;
+            letter-spacing:-.01em;
+            margin-bottom:10px;
         }
         p.lede{
             color:#cbd5e1;
-            font-size:14px;
+            font-size:14.5px;
             line-height:1.6;
-            margin-bottom:18px;
+            margin-bottom:20px;
         }
         p.lede b{ color:var(--red); font-weight:700; }
-        .stats-grid{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:10px;
-            margin-bottom:14px;
-        }
-        .stat-item{
-            background:#0b0710;
-            border:1px solid var(--border);
-            border-radius:8px;
-            padding:10px;
-        }
-        .stat-item .val{
-            font-family:var(--mono);
-            font-size:18px;
-            font-weight:700;
-            color:#fca5a5;
-        }
-        .stat-item .lbl{
-            font-size:11px;
-            color:var(--ink-400);
-            margin-top:2px;
-        }
+
         #targetUrl{
             background:#0b0710;
             border:1px solid var(--border);
-            border-radius:8px;
-            padding:10px 12px;
+            border-radius:10px;
+            padding:12px 14px;
             font-family:var(--mono);
-            font-size:12px;
+            font-size:12.5px;
             color:var(--amber);
             text-align:left;
             word-break:break-all;
             margin-bottom:14px;
         }
+
         #reasonText{
-            background:#181220;
-            border:1px solid var(--border);
-            border-radius:8px;
-            padding:12px;
             text-align:left;
-            font-size:12.5px;
+            font-size:13px;
             color:#fca5a5;
             line-height:1.6;
-            margin-bottom:20px;
+            margin-bottom:22px;
         }
+
         h6.confirm-line{
-            font-size:14px;
+            font-size:14.5px;
             font-weight:600;
             color:var(--ink-000);
-            margin-bottom:16px;
+            margin-bottom:20px;
         }
+
         .actions{
             display:flex;
             flex-direction:column;
-            gap:10px;
+            gap:12px;
         }
         button{
             font-family:var(--sans);
-            border-radius:10px;
+            border-radius:11px;
             border:none;
             cursor:pointer;
-            transition:all .15s ease;
+            transition:transform .15s ease, filter .15s ease, background .2s ease, box-shadow .15s ease;
         }
         #btnCancel{
             background:linear-gradient(135deg,#0f766e,#0d9488 45%,#14b8a6);
             color:#fff;
-            padding:14px;
-            font-size:15px;
+            padding:15px;
+            font-size:15.5px;
             font-weight:700;
-            box-shadow:0 10px 20px -6px rgba(13,148,136,.5);
+            box-shadow:0 12px 24px -8px rgba(13,148,136,.55);
         }
         #btnCancel:hover{
             filter:brightness(1.06);
             transform:translateY(-1px);
+            box-shadow:0 16px 30px -8px rgba(13,148,136,.65);
         }
+        #btnCancel:active{ transform:translateY(0); }
+
         #btnProceed{
             background:transparent;
             color:#f87171;
             border:1.5px solid rgba(239,68,68,.4);
-            padding:11px;
-            font-size:13px;
+            padding:12px;
+            font-size:13.5px;
             font-weight:600;
         }
         #btnProceed:hover{
             background:rgba(239,68,68,.08);
             border-color:var(--red);
         }
+
         .foot-note{
-            margin-top:18px;
+            margin-top:20px;
             font-family:var(--mono);
-            font-size:10px;
+            font-size:10.5px;
             letter-spacing:.08em;
-            color:rgba(255,255,255,.3);
+            color:rgba(255,255,255,.28);
             text-transform:uppercase;
         }
     </style>
@@ -222,34 +217,24 @@
     <div class="card">
         <div class="hazard-bar"></div>
         <div class="card-body">
-            <div class="eyebrow"><span class="dot"></span>Threat Blocked</div>
+            <div class="eyebrow"><span class="dot"></span>Threat Detected</div>
+
             <div class="alert-icon"><span>⚠️</span></div>
 
-            <h2>คำเตือนความเสี่ยงขั้นสูง!</h2>
-            <p class="lede">เว็บไซต์ที่คุณกำลังจะเข้าถูกวิเคราะห์ว่าเข้าข่าย <b>Phishing</b></p>
-
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="val" id="riskVal">0/100</div>
-                    <div class="lbl">Risk Score</div>
-                </div>
-                <div class="stat-item">
-                    <div class="val" id="confVal">0%</div>
-                    <div class="lbl">AI Confidence</div>
-                </div>
-            </div>
+            <h2>คำเตือนความเสี่ยง!</h2>
+            <p class="lede">เว็บไซต์ที่คุณกำลังจะเข้าถูกประเมินว่าอาจเป็น <b>Phishing</b></p>
 
             <div id="targetUrl"></div>
-            <div id="reasonText"></div>
+            <p id="reasonText"></p>
 
             <h6 class="confirm-line">คุณยังคงต้องการที่จะเข้าเว็บไซต์นี้ต่อหรือไม่?</h6>
 
             <div class="actions">
                 <button id="btnCancel">🛡️ กลับไปยังหน้าปลอดภัย (แนะนำ)</button>
-                <button id="btnProceed">⚠️ ยืนยันว่ายอมรับความเสี่ยง และต้องการเข้าต่อ</button>
+                <button id="btnProceed">⚠️ ยืนยันว่าเสี่ยงจริง และต้องการเข้าต่อ</button>
             </div>
 
-            <div class="foot-note">Protected by Hybrid AI Detection Engine</div>
+            <div class="foot-note">Protected by AI Hybrid Detection Engine</div>
         </div>
     </div>
 
